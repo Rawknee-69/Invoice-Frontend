@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Link } from "react-router";
 import { ChevronDown } from "lucide-react";
+import Invoice from "/src/assets/invoice.png";
 
 const navLinks = [
-  { href: "#", label: "Online Invoice Generator" },
+  // { href: "#", label: "Online Invoice Generator" },
   { href: "#", label: "Features", hasDropdown: true },
   { href: "#", label: "Pricing", hasDropdown: true },
   { href: "#", label: "Templates", hasDropdown: true },
@@ -16,37 +17,48 @@ const NavigationLanding = () => {
 
   return (
     <header className="bg-white w-full border-b border-gray-200 z-50 shadow-sm sticky top-0">
-      <div className="max-w-[1200px] mx-auto px-5 h-[88px] flex items-center justify-between">
-        <Link to="/">
-          <img
-            src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/03298abd-8dd0-4070-a08b-cd8d4b187139-invoicesimple-com/assets/images/logo2x-1.png"
-            alt="Invoice Simple"
-            width={200}
-            height={46}
-            className="w-[150px] h-auto lg:w-[200px]"
-          />
+      <div className="w-full max-w-[1400px] mx-auto px-6 lg:px-8 h-[88px] flex items-center justify-between">
+        <Link to="/" className="flex-shrink-0">
+          <div className="flex items-center gap-3">
+            <img
+              src={Invoice}
+              alt="Invoice Man"
+              width={50}
+              height={40}
+              className="w-10 h-10 lg:w-12 lg:h-12"
+            />
+            <div
+              className="text-2xl lg:text-3xl font-bold leading-[1.2] text-[#000000]"
+            >
+              Invoice Man
+            </div>
+          </div>
         </Link>
 
-        <nav className="hidden lg:flex items-center gap-x-8">
-          {navLinks.map((link) => (
-            <a
-              key={link.label}
-              href={link.href}
-              className="text-dark-gray hover:text-primary-orange transition-colors text-base font-medium flex items-center gap-1"
-            >
-              {link.label}
-              {link.hasDropdown && <ChevronDown size={20} strokeWidth={1.5} />}
-            </a>
-          ))}
-        </nav>
+        <div className="hidden lg:flex items-center gap-x-6 xl:gap-x-8">
+          <nav className="flex items-center gap-x-6 xl:gap-x-8">
+            {navLinks.map((link) => (
+              <a
+                key={link.label}
+                href={link.href}
+                className="text-gray-700 hover:text-primary-orange transition-colors text-sm xl:text-base font-medium flex items-center gap-1 whitespace-nowrap"
+              >
+                {link.label}
+                {link.hasDropdown && (
+                  <ChevronDown size={18} strokeWidth={1.5} className="ml-1" />
+                )}
+              </a>
+            ))}
+          </nav>
 
-        <div className="hidden lg:flex items-center">
-          <a
-            href="#"
-            className="bg-primary-orange text-white font-bold rounded-[4px] px-6 py-3 uppercase text-sm tracking-wide hover:bg-opacity-90 transition-colors"
-          >
-            TRY IT FREE
-          </a>
+          <div className="flex items-center ml-4 xl:ml-6">
+            <a
+              href="#"
+              className="bg-primary-orange text-white font-bold rounded-[4px] px-5 py-2.5 xl:px-6 xl:py-3 uppercase text-xs xl:text-sm tracking-wide hover:bg-opacity-90 transition-colors whitespace-nowrap"
+            >
+              TRY IT FREE
+            </a>
+          </div>
         </div>
 
         <div className="lg:hidden">

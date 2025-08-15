@@ -3,7 +3,7 @@ import { ArrowRight } from "lucide-react";
 const HeroSection = () => {
   return (
     <section className="bg-white py-20">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-2 lg:gap-16">
           <div className="text-center lg:text-left">
             <h1 className="text-5xl font-bold leading-[1.2] text-[#4A4A4A]">
@@ -35,7 +35,7 @@ const HeroSection = () => {
 
           <div className="flex justify-center">
             <img
-              src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/03298abd-8dd0-4070-a08b-cd8d4b187139-invoicesimple-com/assets/images/hero-homepage-1-1-1200x1034-4.jpg"
+              src="https://res.cloudinary.com/spiralyze/image/upload/f_auto/invoicesimple/1007/hero-main-image.webp"
               alt="Invoice Simple app shown on a laptop and a mobile phone"
               width={1200}
               height={1034}
