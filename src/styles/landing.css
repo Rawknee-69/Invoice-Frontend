@@ -1,0 +1,91 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@theme {
+  --color-primary-orange: #FF5722;
+  --color-white: #FFFFFF;
+  --color-light-gray: #F5F5F5;
+  --color-dark-gray: #4A4A4A;
+  --color-medium-gray: #6B6B6B;
+  --color-green: #4CAF50;
+  --color-blue: #5865F2;
+
+  --font-sans: 'Roboto', sans-serif;
+
+  --text-h1: 48px;
+  --text-h2: 36px;
+  --text-h3: 24px;
+  --text-body: 16px;
+  --text-small: 14px;
+  --text-button: 16px;
+
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 700;
+
+  --radius-default: 8px;
+
+  --shadow-default: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+@layer base {
+  html {
+    font-family: var(--font-sans);
+    scroll-behavior: smooth;
+  }
+
+  body {
+    color: var(--color-dark-gray);
+    background-color: var(--color-white);
+    line-height: 1.5;
+  }
+
+  h1 {
+    font-size: var(--text-h1);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-dark-gray);
+    line-height: 1.2;
+  }
+
+  h2 {
+    font-size: var(--text-h2);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-dark-gray);
+    line-height: 1.3;
+  }
+
+  h3 {
+    font-size: var(--text-h3);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-dark-gray);
+    line-height: 1.4;
+  }
+
+  p {
+    font-size: var(--text-body);
+    font-weight: var(--font-weight-regular);
+    color: var(--color-medium-gray);
+  }
+
+  a {
+    color: var(--color-primary-orange);
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+
+  a:hover {
+    color: var(--color-dark-gray);
+  }
+
+  button {
+    font-size: var(--text-button);
+    font-weight: var(--font-weight-medium);
+    border-radius: var(--radius-default);
+    padding: 16px 32px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+}

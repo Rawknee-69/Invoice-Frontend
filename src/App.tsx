@@ -5,7 +5,7 @@ import {
   useLocation,
 } from "react-router";
 import { useEffect } from "react";
-import { Home, Page404 } from "./index";
+import { Home, Page404 , LandingPage } from "./index";
 
 import { ThemeProvider } from "./index";
 import { register } from "swiper/element/bundle";
@@ -29,7 +29,7 @@ function App() {
         <TrackPageViews />
         <div style={{ minHeight: "35rem" }}>
           <Routes>
-            <Route path="/" element={<Home />} />
+            <Route path="/" element={<LandingPage />} />
             <Route path="/home" element={<Home />} />
             <Route path="*" element={<Page404 />} />
           </Routes>
