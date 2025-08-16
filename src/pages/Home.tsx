@@ -1,11 +1,11 @@
 import React from "react";
-import { ModeToggle } from "../index";
+import { Navbar } from "@/components/Navigation/Navbar/navbar";
 
 const Home: React.FC = () => {
   return (
     <div>
-      <ModeToggle />
-      <h1>Home</h1>
+      {/* <ModeToggle /> */}
+      <Navbar />
     </div>
   );
 };
