@@ -8,6 +8,7 @@ interface User {
   email: string;
   name: string;
   image?: string | null;
+  emailVerified?: boolean;
 }
 
 interface AuthProviderProps {
@@ -24,6 +25,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         email: session.user.email,
         name: session.user.name,
         image: session.user.image || undefined,
+        emailVerified: session.user.emailVerified || false,
       }
     : null;
 
@@ -91,6 +93,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         name,
       });
       toastMessages.auth.signupSuccess();
+      toastMessages.general.info(
+        "Please check your email to verify your account before signing in."
+      );
     } catch (error) {
       console.error("Email signup failed:", error);
       const errorMessage =

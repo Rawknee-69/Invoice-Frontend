@@ -31,6 +31,11 @@ export const toastMessages = {
       toast.error("Invalid email or password. Please try again."),
     passwordTooShort: () =>
       toast.error("Password must be at least 6 characters long."),
+    emailVerificationSent: () =>
+      toast.success("Verification email sent! Please check your inbox."),
+    emailVerified: () => toast.success("Email verified successfully! Welcome!"),
+    emailNotVerified: () =>
+      toast.error("Please verify your email before signing in."),
   },
 
   // Form validation messages

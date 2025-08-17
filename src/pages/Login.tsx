@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Navigate } from "react-router";
 import Invoice from "/src/assets/invoice.png";
 import { toastMessages } from "../utils/toast";
+import { ForgotPasswordModal } from "../components/auth/ForgotPasswordModal";
 
 const Login: React.FC = () => {
   const {
@@ -16,6 +17,7 @@ const Login: React.FC = () => {
     isLoading,
   } = useAuth();
   const [isSignUp, setIsSignUp] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -197,6 +199,20 @@ const Login: React.FC = () => {
                 "Sign In"
               )}
             </Button>
+
+            {/* Forgot Password Link - only show for sign in */}
+            {!isSignUp && (
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={() => setShowForgotPassword(true)}
+                  className="text-sm text-primary hover:underline"
+                  disabled={isLoading}
+                >
+                  Forgot your password?
+                </button>
+              </div>
+            )}
           </form>
 
           {/* Toggle between Sign In and Sign Up */}
@@ -315,6 +331,12 @@ const Login: React.FC = () => {
           </p>
         </div>
       </div>
+
+      {/* Forgot Password Modal */}
+      <ForgotPasswordModal
+        isOpen={showForgotPassword}
+        onClose={() => setShowForgotPassword(false)}
+      />
     </div>
   );
 };
