@@ -5,7 +5,7 @@ import {
   useLocation,
 } from "react-router";
 import { useEffect } from "react";
-import { Home, Page404 , LandingPage, Invoices } from "./index";
+import { Home, Page404 , LandingPage, Invoices, Estimates, Expenses, Reports } from "./index";
 
 import { ThemeProvider } from "./index";
 import { register } from "swiper/element/bundle";
@@ -32,6 +32,9 @@ function App() {
             <Route path="/" element={<LandingPage />} />
             <Route path="/home" element={<Home />} />
             <Route path="/invoices" element={<Invoices />} />
+            <Route path="/estimates" element={<Estimates />} />
+            <Route path="/expenses" element={<Expenses />} />
+            <Route path="/reports" element={<Reports />} />
             <Route path="*" element={<Page404 />} />
           </Routes>
         </div>

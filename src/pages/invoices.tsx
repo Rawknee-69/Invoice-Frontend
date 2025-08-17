@@ -1,13 +1,15 @@
 import React from "react";
 import { Navbar } from "@/components/Navigation/Navbar/navbar";
+import Invoices from "@/components/Invoices/invoices";
 
-const Invoices: React.FC = () => {
+const InvoicesPage: React.FC = () => {
   return (
     <div>
       {/* <ModeToggle /> */}
       <Navbar />
+      <Invoices />
     </div>
   );
 };
 
-export default Invoices;
+export default InvoicesPage;
