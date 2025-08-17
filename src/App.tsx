@@ -5,7 +5,18 @@ import {
   useLocation,
 } from "react-router";
 import { useEffect } from "react";
-import { Home, Page404 , LandingPage, InvoicesPage, EstimatesPage, ExpensesPage, ReportsPage } from "./index";
+import {
+  Home,
+  Page404,
+  LandingPage,
+  InvoicesPage,
+  EstimatesPage,
+  ExpensesPage,
+  ReportsPage,
+  Login,
+  AuthProvider,
+  ProtectedRoute,
+} from "./index";
 
 import { ThemeProvider } from "./index";
 import { register } from "swiper/element/bundle";
@@ -25,20 +36,63 @@ function App() {
 
   return (
     <Router>
-      <ThemeProvider>
-        <TrackPageViews />
-        <div style={{ minHeight: "35rem" }}>
-          <Routes>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/home" element={<Home />} />
-            <Route path="/invoices" element={<InvoicesPage />} />
-            <Route path="/estimates" element={<EstimatesPage />} />
-            <Route path="/expenses" element={<ExpensesPage />} />
-            <Route path="/reports" element={<ReportsPage />} />
-            <Route path="*" element={<Page404 />} />
-          </Routes>
-        </div>
-      </ThemeProvider>
+      <AuthProvider>
+        <ThemeProvider>
+          <TrackPageViews />
+          <div style={{ minHeight: "35rem" }}>
+            <Routes>
+              {/* Public routes */}
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/login" element={<Login />} />
+
+              {/* Protected routes */}
+              <Route
+                path="/home"
+                element={
+                  <ProtectedRoute>
+                    <Home />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/invoices"
+                element={
+                  <ProtectedRoute>
+                    <InvoicesPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/estimates"
+                element={
+                  <ProtectedRoute>
+                    <EstimatesPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/expenses"
+                element={
+                  <ProtectedRoute>
+                    <ExpensesPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/reports"
+                element={
+                  <ProtectedRoute>
+                    <ReportsPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* 404 page */}
+              <Route path="*" element={<Page404 />} />
+            </Routes>
+          </div>
+        </ThemeProvider>
+      </AuthProvider>
     </Router>
   );
 }
