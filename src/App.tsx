@@ -22,6 +22,7 @@ import {
 import { ThemeProvider } from "./index";
 import { register } from "swiper/element/bundle";
 import ReactGA from "react-ga4";
+import { Toaster } from "react-hot-toast";
 
 register();
 
@@ -94,6 +95,29 @@ function App() {
           </div>
           {/* Debug component - remove this later */}
           {/* <DebugUser /> */}
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              duration: 4000,
+              style: {
+                background: "hsl(var(--card))",
+                color: "hsl(var(--card-foreground))",
+                border: "1px solid hsl(var(--border))",
+              },
+              success: {
+                iconTheme: {
+                  primary: "hsl(var(--primary))",
+                  secondary: "hsl(var(--primary-foreground))",
+                },
+              },
+              error: {
+                iconTheme: {
+                  primary: "hsl(var(--destructive))",
+                  secondary: "hsl(var(--destructive-foreground))",
+                },
+              },
+            }}
+          />
         </ThemeProvider>
       </AuthProvider>
     </Router>

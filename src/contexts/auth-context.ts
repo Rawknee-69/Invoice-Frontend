@@ -12,6 +12,13 @@ interface AuthContextType {
   isLoading: boolean;
   isAuthenticated: boolean;
   login: () => void;
+  loginWithApple: () => void;
+  loginWithEmail: (email: string, password: string) => Promise<void>;
+  signUpWithEmail: (
+    email: string,
+    password: string,
+    name: string
+  ) => Promise<void>;
   logout: () => void;
   checkAuth: () => Promise<void>;
 }
