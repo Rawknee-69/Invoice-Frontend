@@ -3,7 +3,7 @@ import { useAuth } from "../hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Navigate } from "react-router";
 import Invoice from "/src/assets/invoice.png";
-
+// TODO : Add username , email and password login , apple id 
 const Login: React.FC = () => {
   const { login, isAuthenticated, isLoading } = useAuth();
   const [error, setError] = useState<string | null>(null);
