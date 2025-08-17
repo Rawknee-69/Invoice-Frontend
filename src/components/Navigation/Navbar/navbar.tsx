@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 
 import { ModeToggle } from "@/components/Themes/modetoggle";
-import { useAuth } from "../../../contexts/AuthContext";
+import { useAuth } from "../../../hooks/useAuth";
 
 interface NavbarProps {
   searchPlaceholder?: string;

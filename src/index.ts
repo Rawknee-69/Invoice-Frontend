@@ -8,5 +8,6 @@ export { default as EstimatesPage } from "./pages/Estimates";
 export { default as ExpensesPage } from "./pages/Expenses";
 export { default as ReportsPage } from "./pages/Reports";
 export { default as Login } from "./pages/Login";
-export { AuthProvider, useAuth } from "./contexts/AuthContext";
+export { AuthProvider } from "./contexts/AuthContext";
+export { useAuth } from "./hooks/useAuth";
 export { default as ProtectedRoute } from "./components/ProtectedRoute";

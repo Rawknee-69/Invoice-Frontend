@@ -17,6 +17,7 @@ import {
   AuthProvider,
   ProtectedRoute,
 } from "./index";
+// import DebugUser from "./components/DebugUser";
 
 import { ThemeProvider } from "./index";
 import { register } from "swiper/element/bundle";
@@ -91,6 +92,8 @@ function App() {
               <Route path="*" element={<Page404 />} />
             </Routes>
           </div>
+          {/* Debug component - remove this later */}
+          {/* <DebugUser /> */}
         </ThemeProvider>
       </AuthProvider>
     </Router>
