@@ -1,5 +1,6 @@
 import React from "react";
 import { Navbar } from "@/components/Navigation/Navbar/navbar";
+import Footer from "@/components/Footer/footer";
 import Invoices from "@/components/Invoices/invoices";
 
 const InvoicesPage: React.FC = () => {
@@ -8,6 +9,7 @@ const InvoicesPage: React.FC = () => {
       {/* <ModeToggle /> */}
       <Navbar />
       <Invoices />
+      <Footer />
     </div>
   );
 };

@@ -1,21 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { Link, useLocation } from "react-router";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  Settings,
+  // Settings,
   Search,
   // Plus,
   FileText,
   Calculator,
   Receipt,
   BarChart3,
-  X,
 } from "lucide-react";
 
+import { ModeToggle } from "@/components/Themes/modetoggle";
+
 interface NavbarProps {
-  currentPage?: string;
   searchPlaceholder?: string;
   showNewButton?: boolean;
   newButtonText?: string;
@@ -23,20 +23,31 @@ interface NavbarProps {
 }
 
 export function Navbar({
-  currentPage = "Estimates",
   searchPlaceholder = "Search...",
   // showNewButton = true,
   // newButtonText = "New Item",
   // onNewClick,
 }: NavbarProps) {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const location = useLocation();
 
   const navigationItems = [
-    { name: "Invoices", icon: FileText, href: "#" },
-    { name: "Estimates", icon: Calculator, href: "#" },
-    { name: "Expenses", icon: Receipt, href: "#" },
-    { name: "Reports", icon: BarChart3, href: "#" },
+    { name: "Invoices", icon: FileText, href: "/invoices" },
+    { name: "Estimates", icon: Calculator, href: "/estimates" },
+    { name: "Expenses", icon: Receipt, href: "/expenses" },
+    { name: "Reports", icon: BarChart3, href: "/reports" },
   ];
+
+  // Get current page from location
+  const getCurrentPage = () => {
+    const path = location.pathname;
+    if (path === "/invoices") return "Invoices";
+    if (path === "/estimates") return "Estimates";
+    if (path === "/expenses") return "Expenses";
+    if (path === "/reports") return "Reports";
+    return "Invoices"; // default
+  };
+
+  const currentPage = getCurrentPage();
 
   return (
     <>
@@ -54,9 +65,9 @@ export function Navbar({
 
           <div className="flex items-center space-x-6">
             {navigationItems.map((item) => (
-              <a
+              <Link
                 key={item.name}
-                href={item.href}
+                to={item.href}
                 className={`flex items-center space-x-2 transition-colors ${
                   currentPage === item.name
                     ? "text-primary font-medium"
@@ -65,7 +76,7 @@ export function Navbar({
               >
                 <item.icon className="w-4 h-4" />
                 <span>{item.name}</span>
-              </a>
+              </Link>
             ))}
           </div>
         </div>
@@ -75,9 +86,10 @@ export function Navbar({
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <Input placeholder={searchPlaceholder} className="pl-10 w-64" />
           </div>
-          <Button variant="outline" size="icon">
+          {/* <Button variant="outline" size="icon">
             <Settings className="w-4 h-4" />
-          </Button>
+          </Button> */}
+          <ModeToggle />
           {/* {showNewButton && (
             <Button
               className="bg-primary hover:bg-primary/90 text-primary-foreground"
@@ -90,21 +102,15 @@ export function Navbar({
         </div>
       </nav>
 
-      {/* Mobile Header */}
+      {/* Mobile Header - Simplified since navigation is now in footer dock */}
       <div className="md:hidden">
-        {/* Header */}
         <div className="bg-primary text-primary-foreground px-4 py-4 flex items-center justify-between">
           <Button
             variant="ghost"
             size="icon"
             className="text-primary-foreground hover:bg-primary/80"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
-            {isMobileMenuOpen ? (
-              <X className="w-5 h-5" />
-            ) : (
-              <Settings className="w-5 h-5" />
-            )}
+            {/* <Settings className="w-5 h-5" /> */}
           </Button>
           <h1 className="text-lg font-medium">{currentPage}</h1>
           <Button
@@ -115,39 +121,6 @@ export function Navbar({
             <Search className="w-5 h-5" />
           </Button>
         </div>
-
-        {/* Mobile Menu Overlay */}
-        {isMobileMenuOpen && (
-          <div className="absolute top-0 left-0 right-0 bottom-0 bg-background z-50 p-4">
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-xl font-semibold">Menu</h2>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                <X className="w-5 h-5" />
-              </Button>
-            </div>
-            <div className="space-y-4">
-              {navigationItems.map((item) => (
-                <a
-                  key={item.name}
-                  href={item.href}
-                  className={`flex items-center space-x-3 p-3 rounded-lg ${
-                    currentPage === item.name
-                      ? "bg-accent text-accent-foreground"
-                      : "hover:bg-accent/50"
-                  }`}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <item.icon className="w-5 h-5" />
-                  <span>{item.name}</span>
-                </a>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </>
   );
