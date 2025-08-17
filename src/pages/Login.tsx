@@ -25,15 +25,15 @@ const Login: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div className="max-w-md w-full bg-card border border-border rounded-2xl shadow-lg p-8">
         {/* Logo and Title */}
         <div className="text-center mb-8">
           <div className="flex justify-center items-center mb-4">
@@ -45,10 +45,10 @@ const Login: React.FC = () => {
               className="w-15 h-15"
             />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <h1 className="text-3xl font-bold text-foreground mb-2">
             Welcome to Invoice Man
           </h1>
-          <p className="text-gray-600">
+          <p className="text-muted-foreground">
             Sign in to manage your invoices, estimates, and expenses
           </p>
         </div>
@@ -57,7 +57,7 @@ const Login: React.FC = () => {
         <div className="space-y-6">
           {/* Error Message */}
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+            <div className="bg-destructive/10 border border-destructive text-destructive px-4 py-3 rounded-lg">
               {error}
             </div>
           )}
@@ -66,7 +66,7 @@ const Login: React.FC = () => {
           <Button
             onClick={handleGoogleSignIn}
             disabled={isLoading}
-            className="w-full h-12 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-colors flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full h-12 bg-background border border-border text-foreground hover:bg-accent hover:text-accent-foreground transition-colors flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
             variant="outline"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -89,7 +89,7 @@ const Login: React.FC = () => {
             </svg>
             {isLoading ? (
               <div className="flex items-center">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-700 mr-2"></div>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-foreground mr-2"></div>
                 Signing in...
               </div>
             ) : (
@@ -100,39 +100,39 @@ const Login: React.FC = () => {
           {/* Divider */}
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300" />
+              <div className="w-full border-t border-border" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">
+              <span className="px-2 bg-card text-muted-foreground">
                 Secure authentication powered by Google
               </span>
             </div>
           </div>
 
           {/* Features */}
-          <div className="bg-gray-50 rounded-lg p-4">
-            <h3 className="text-sm font-semibold text-gray-900 mb-3">
+          <div className="bg-muted rounded-lg p-4">
+            <h3 className="text-sm font-semibold text-foreground mb-3">
               What you'll get access to:
             </h3>
-            <ul className="space-y-2 text-sm text-gray-600">
+            <ul className="space-y-2 text-sm text-muted-foreground">
               <li className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-blue-600 rounded-full"></div>
+                <div className="w-1.5 h-1.5 bg-primary rounded-full"></div>
                 Create and manage professional invoices
               </li>
               <li className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-blue-600 rounded-full"></div>
+                <div className="w-1.5 h-1.5 bg-primary rounded-full"></div>
                 Generate estimates and convert to invoices
               </li>
               <li className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-blue-600 rounded-full"></div>
+                <div className="w-1.5 h-1.5 bg-primary rounded-full"></div>
                 Track expenses with receipt scanning
               </li>
               <li className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-blue-600 rounded-full"></div>
+                <div className="w-1.5 h-1.5 bg-primary rounded-full"></div>
                 Manage clients and payment schedules
               </li>
               <li className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-blue-600 rounded-full"></div>
+                <div className="w-1.5 h-1.5 bg-primary rounded-full"></div>
                 Generate detailed reports and analytics
               </li>
             </ul>
@@ -141,13 +141,13 @@ const Login: React.FC = () => {
 
         {/* Footer */}
         <div className="mt-8 text-center">
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-muted-foreground">
             By signing in, you agree to our{" "}
-            <a href="#" className="text-blue-600 hover:underline">
+            <a href="#" className="text-primary hover:underline">
               Terms of Service
             </a>{" "}
             and{" "}
-            <a href="#" className="text-blue-600 hover:underline">
+            <a href="#" className="text-primary hover:underline">
               Privacy Policy
             </a>
           </p>

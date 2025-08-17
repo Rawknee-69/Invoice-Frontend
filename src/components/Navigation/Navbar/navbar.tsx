@@ -17,6 +17,7 @@ import {
 
 import { ModeToggle } from "@/components/Themes/modetoggle";
 import { useAuth } from "../../../hooks/useAuth";
+import { getImageUrl } from "../../../utils/image";
 
 interface NavbarProps {
   searchPlaceholder?: string;
@@ -96,11 +97,26 @@ export function Navbar({
           {user && (
             <div className="flex items-center space-x-3">
               <div className="flex items-center space-x-2">
-                {user.image ? (
+                {getImageUrl(user.image) ? (
                   <img
-                    src={user.image}
+                    src={getImageUrl(user.image)!}
                     alt={user.name}
                     className="w-8 h-8 rounded-full"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    crossOrigin="anonymous"
+                    onError={(e) => {
+                      console.error(
+                        "Failed to load profile image:",
+                        user.image
+                      );
+                      e.currentTarget.style.display = "none";
+                      e.currentTarget.nextElementSibling?.removeAttribute(
+                        "style"
+                      );
+                    }}
+                    onLoad={() =>
+                      console.log("Profile image loaded successfully")
+                    }
                   />
                 ) : (
                   <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
@@ -130,11 +146,23 @@ export function Navbar({
         <div className="bg-primary text-primary-foreground px-4 py-4 flex items-center justify-between">
           {user && (
             <div className="flex items-center space-x-2">
-              {user.image ? (
+              {getImageUrl(user.image) ? (
                 <img
-                  src={user.image}
+                  src={getImageUrl(user.image)!}
                   alt={user.name}
                   className="w-6 h-6 rounded-full"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  crossOrigin="anonymous"
+                  onError={(e) => {
+                    console.error(
+                      "Failed to load mobile profile image:",
+                      user.image
+                    );
+                    e.currentTarget.style.display = "none";
+                  }}
+                  onLoad={() =>
+                    console.log("Mobile profile image loaded successfully")
+                  }
                 />
               ) : (
                 <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
