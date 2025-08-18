@@ -1,7 +1,7 @@
 import { useState } from "react";
 import EstimatesFilterTabs, {
   type EstimatesStatus,
-} from "./EstimatefilterTabs";
+} from "./EstimateFilterTabs";
 
 const Invoices = () => {
   const [activeFilter, setActiveFilter] = useState<EstimatesStatus>("all");
