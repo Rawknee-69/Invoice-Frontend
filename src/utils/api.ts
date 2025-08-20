@@ -36,15 +36,15 @@ export const apiRequest = async <T>(
       return {
         error: {
           type: "API_ERROR",
-          message: data.error?.message || "An error occurred",
-          code: data.error?.code || "UNKNOWN_ERROR",
+          message: (data as any).error?.message || "An error occurred",
+          code: (data as any).error?.code || "UNKNOWN_ERROR",
           timestamp: new Date().toISOString(),
-          details: data.error?.details || [],
+          details: (data as any).error?.details || [],
         },
       };
     }
 
-    return { data, message: data.message };
+    return { data: data as T, message: (data as any).message };
   } catch (error) {
     return {
       error: {

@@ -3,7 +3,7 @@ export { ModeToggle } from "./components/Themes/modetoggle";
 export { default as Home } from "./pages/Home";
 export { default as Page404 } from "./pages/404";
 export { default as LandingPage } from "./pages/LandingPage";
-export { default as InvoicesPage } from "./pages/Invoices";
+export { default as InvoicesPage } from "./pages/invoices";
 export { default as EstimatesPage } from "./pages/Estimates";
 export { default as ExpensesPage } from "./pages/Expenses";
 export { default as ReportsPage } from "./pages/Reports";
