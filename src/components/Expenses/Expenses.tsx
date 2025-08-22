@@ -12,14 +12,17 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { expenseApi } from '@/utils/api';
 import ExpenseStats from './ExpenseStats';
 import ReceiptScanner from './ReceiptScanner';
+import { ReceiptImage } from '@/components/ui/receipt-image';
 
 interface Expense {
   id: string;
   description: string;
-  amount: number;
+  total: number;
+  tax: number;
   date: string;
   category: string;
   merchantName?: string;
+  receiptImage?: string;
   receiptImageUrl?: string;
   notes?: string;
   tags?: string[];
@@ -28,10 +31,13 @@ interface Expense {
 }
 
 interface ExpenseStats {
-  totalExpenses: number;
-  monthlyTotal: number;
-  categoryBreakdown: Array<{ category: string; amount: number; count: number }>;
-  recentTrends: Array<{ month: string; amount: number }>;
+  year: number;
+  totalAmount: number;
+  totalTax: number;
+  totalCount: number;
+  monthlyTrend: number;
+  byCategory: Array<{ category: string; total: number; tax: number; count: number }>;
+  byMonth: Array<{ month: number; total: number; tax: number; count: number }>;
 }
 
 interface ExpenseFormData {
@@ -84,6 +90,10 @@ const Expenses: React.FC = () => {
   
   // Receipt scanning
   const [isScanning, setIsScanning] = useState(false);
+  
+  // Delete confirmation
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [expenseToDelete, setExpenseToDelete] = useState<string | null>(null);
 
   // Fetch expenses with filters
   const fetchExpenses = useCallback(async () => {
@@ -103,7 +113,9 @@ const Expenses: React.FC = () => {
         setError(response.error.message);
       } else {
         const data = response.data as any;
-        setExpenses(data?.expenses || []);
+        // Backend returns { data: expenses[], pagination: {...} }
+        setExpenses(data?.data || []);
+        console.log('Expenses fetched:', data?.data?.length || 0, 'expenses');
       }
     } catch (err) {
       setError('Failed to fetch expenses');
@@ -196,8 +208,12 @@ const Expenses: React.FC = () => {
 
       const uploadData = uploadResponse.data as any;
       
+      // Use presigned URL for display, original URL for scanning
+      const displayUrl = uploadData.presignedUrl || uploadData.imageUrl;
+      const scanUrl = uploadData.imageUrl;
+      
       // Scan and populate
-      const scanResponse = await expenseApi.scanAndPopulate(uploadData.imageUrl);
+      const scanResponse = await expenseApi.scanAndPopulate(scanUrl);
       if (scanResponse.error) {
         setError(scanResponse.error.message);
         return;
@@ -215,7 +231,7 @@ const Expenses: React.FC = () => {
           date: fields.date ? new Date(fields.date).toISOString().split('T')[0] : prev.date,
           category: fields.category || prev.category,
           merchantName: fields.merchantName || prev.merchantName,
-          receiptImageUrl: uploadData.imageUrl
+          receiptImageUrl: displayUrl
         }));
       }
     } catch (err) {
@@ -226,19 +242,26 @@ const Expenses: React.FC = () => {
   };
 
   // Handle delete expense
-  const handleDelete = async (expenseId: string) => {
-    if (window.confirm('Are you sure you want to delete this expense?')) {
-      try {
-        const response = await expenseApi.delete(expenseId);
-        if (response.error) {
-          setError(response.error.message);
-        } else {
-          fetchExpenses();
-          fetchStats();
-        }
-      } catch (err) {
-        setError('Failed to delete expense');
+  const handleDeleteConfirm = (expenseId: string) => {
+    setExpenseToDelete(expenseId);
+    setDeleteConfirmOpen(true);
+  };
+
+  const handleDelete = async () => {
+    if (!expenseToDelete) return;
+    
+    try {
+      const response = await expenseApi.delete(expenseToDelete);
+      if (response.error) {
+        setError(response.error.message);
+      } else {
+        fetchExpenses();
+        fetchStats();
+        setDeleteConfirmOpen(false);
+        setExpenseToDelete(null);
       }
+    } catch (err) {
+      setError('Failed to delete expense');
     }
   };
 
@@ -247,7 +270,7 @@ const Expenses: React.FC = () => {
     setSelectedExpense(expense);
     setFormData({
       description: expense.description,
-      amount: expense.amount.toString(),
+      amount: expense.total.toString(),
       date: new Date(expense.date).toISOString().split('T')[0],
       category: expense.category,
       merchantName: expense.merchantName || '',
@@ -337,7 +360,7 @@ const Expenses: React.FC = () => {
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-lg sm:text-2xl font-bold">{formatCurrency(stats.totalExpenses)}</div>
+              <div className="text-lg sm:text-2xl font-bold">{formatCurrency(stats.totalAmount)}</div>
             </CardContent>
           </Card>
           
@@ -350,7 +373,12 @@ const Expenses: React.FC = () => {
               <Calendar className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-lg sm:text-2xl font-bold">{formatCurrency(stats.monthlyTotal)}</div>
+              <div className="text-lg sm:text-2xl font-bold">
+                {formatCurrency(
+                  stats.byMonth?.find(m => m.month === new Date().getMonth() + 1)?.total || 
+                  stats.byMonth?.reduce((sum, month) => sum + month.total, 0) / 12 || 0
+                )}
+              </div>
             </CardContent>
           </Card>
           
@@ -360,7 +388,7 @@ const Expenses: React.FC = () => {
               <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-lg sm:text-2xl font-bold">{stats.categoryBreakdown?.length || 0}</div>
+              <div className="text-lg sm:text-2xl font-bold">{stats.byCategory?.length || 0}</div>
             </CardContent>
           </Card>
           
@@ -370,7 +398,9 @@ const Expenses: React.FC = () => {
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-lg sm:text-2xl font-bold text-green-600">+12%</div>
+              <div className={`text-lg sm:text-2xl font-bold ${stats.monthlyTrend >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                {stats.monthlyTrend >= 0 ? '+' : ''}{stats.monthlyTrend.toFixed(1)}%
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -410,25 +440,19 @@ const Expenses: React.FC = () => {
               </SelectContent>
             </Select>
             
-            <div className="space-y-1">
-              <label className="text-xs text-muted-foreground">From Date</label>
-              <Input
-                type="date"
-                placeholder="Start date"
-                value={dateFrom}
-                onChange={(e) => setDateFrom(e.target.value)}
-              />
-            </div>
+            <Input
+              type="date"
+              placeholder="From Date"
+              value={dateFrom}
+              onChange={(e) => setDateFrom(e.target.value)}
+            />
             
-            <div className="space-y-1">
-              <label className="text-xs text-muted-foreground">To Date</label>
-              <Input
-                type="date"
-                placeholder="End date"
-                value={dateTo}
-                onChange={(e) => setDateTo(e.target.value)}
-              />
-            </div>
+            <Input
+              type="date"
+              placeholder="To Date"
+              value={dateTo}
+              onChange={(e) => setDateTo(e.target.value)}
+            />
             
             <Button 
               variant="outline" 
@@ -504,20 +528,27 @@ const Expenses: React.FC = () => {
                     </TableCell>
                     <TableCell className="hidden md:table-cell">{expense.merchantName || '-'}</TableCell>
                     <TableCell className="font-mono text-sm">
-                      {formatCurrency(expense.amount)}
+                      {formatCurrency(expense.total)}
                     </TableCell>
                     <TableCell className="hidden lg:table-cell">
-                      {expense.receiptImageUrl ? (
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          onClick={() => window.open(expense.receiptImageUrl, '_blank')}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                      ) : (
-                        '-'
-                      )}
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => {
+                          if (expense.receiptImageUrl || expense.receiptImage) {
+                            window.open(expense.receiptImageUrl || expense.receiptImage, '_blank');
+                          }
+                        }}
+                        disabled={!(expense.receiptImageUrl || expense.receiptImage)}
+                        className={`${
+                          (expense.receiptImageUrl || expense.receiptImage) 
+                            ? 'text-blue-600 hover:text-blue-800 cursor-pointer' 
+                            : 'text-gray-400 cursor-not-allowed'
+                        }`}
+                      >
+                        <Eye className="h-4 w-4 mr-1" />
+                        View
+                      </Button>
                     </TableCell>
                     <TableCell>
                       <DropdownMenu>
@@ -531,18 +562,21 @@ const Expenses: React.FC = () => {
                             <Edit className="h-4 w-4 mr-2" />
                             Edit
                           </DropdownMenuItem>
-                          {expense.receiptImageUrl && (
-                            <DropdownMenuItem 
-                              className="lg:hidden"
-                              onClick={() => window.open(expense.receiptImageUrl, '_blank')}
-                            >
-                              <Eye className="h-4 w-4 mr-2" />
-                              View Receipt
-                            </DropdownMenuItem>
-                          )}
+                          <DropdownMenuItem 
+                            className="lg:hidden"
+                            disabled={!(expense.receiptImageUrl || expense.receiptImage)}
+                            onClick={() => {
+                              if (expense.receiptImageUrl || expense.receiptImage) {
+                                window.open(expense.receiptImageUrl || expense.receiptImage, '_blank');
+                              }
+                            }}
+                          >
+                            <Eye className="h-4 w-4 mr-2" />
+                            {(expense.receiptImageUrl || expense.receiptImage) ? 'View Receipt' : 'No Receipt'}
+                          </DropdownMenuItem>
                           <DropdownMenuItem 
                             variant="destructive"
-                            onClick={() => handleDelete(expense.id)}
+                            onClick={() => handleDeleteConfirm(expense.id)}
                           >
                             <Trash2 className="h-4 w-4 mr-2" />
                             Delete
@@ -714,10 +748,10 @@ const Expenses: React.FC = () => {
                     )}
                     {formData.receiptImageUrl && (
                       <div className="mt-3 sm:mt-4">
-                        <img 
+                        <ReceiptImage
                           src={formData.receiptImageUrl} 
                           alt="Receipt" 
-                          className="max-h-24 sm:max-h-32 mx-auto rounded border"
+                          className="max-h-24 sm:max-h-32 mx-auto rounded border cursor-pointer hover:opacity-80"
                         />
                       </div>
                     )}
@@ -767,6 +801,40 @@ const Expenses: React.FC = () => {
             </DialogDescription>
           </DialogHeader>
           <ExpenseStats />
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <Trash2 className="h-5 w-5" />
+              Delete Expense
+            </DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this expense? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setDeleteConfirmOpen(false);
+                setExpenseToDelete(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={handleDelete}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Delete
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
