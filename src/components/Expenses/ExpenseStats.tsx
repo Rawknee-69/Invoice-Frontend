@@ -6,25 +6,26 @@ import { expenseApi } from '@/utils/api';
 
 interface CategoryStats {
   category: string;
-  amount: number;
+  total: number;
+  tax: number;
   count: number;
-  percentage: number;
 }
 
-interface MonthlyTrend {
-  month: string;
-  amount: number;
+interface MonthlyStats {
+  month: number;
+  total: number;
+  tax: number;
   count: number;
 }
 
 interface ExpenseStatsData {
-  totalExpenses: number;
-  monthlyTotal: number;
-  yearlyTotal: number;
-  averageExpense: number;
-  categoryBreakdown: CategoryStats[];
-  monthlyTrends: MonthlyTrend[];
-  topMerchants: Array<{ merchant: string; amount: number; count: number }>;
+  year: number;
+  totalAmount: number;
+  totalTax: number;
+  totalCount: number;
+  monthlyTrend: number;
+  byCategory: CategoryStats[];
+  byMonth: MonthlyStats[];
 }
 
 const COLORS = [
@@ -50,13 +51,35 @@ const ExpenseStats: React.FC = () => {
       
       const response = await expenseApi.getStats(params);
       if (response.data) {
-        setStats(response.data);
+        setStats(response.data as ExpenseStatsData);
       }
     } catch (error) {
       console.error('Failed to fetch expense stats:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  // Calculate derived values
+  const getCurrentMonthTotal = () => {
+    if (!stats) return 0;
+    const currentMonth = new Date().getMonth() + 1;
+    const currentMonthData = stats.byMonth?.find(m => m.month === currentMonth);
+    return currentMonthData?.total || 0;
+  };
+
+  const getAverageExpense = () => {
+    if (!stats || stats.totalCount === 0) return 0;
+    return stats.totalAmount / stats.totalCount;
+  };
+
+  const getCategoryBreakdown = () => {
+    if (!stats?.byCategory) return [];
+    const total = stats.totalAmount;
+    return stats.byCategory.map(category => ({
+      ...category,
+      percentage: total > 0 ? (category.total / total) * 100 : 0
+    }));
   };
 
   const formatCurrency = (amount: number) => {
@@ -128,7 +151,7 @@ const ExpenseStats: React.FC = () => {
               <CardTitle className="text-sm font-medium">Total Expenses</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{formatCurrency(stats.totalExpenses)}</div>
+              <div className="text-2xl font-bold">{formatCurrency(stats.totalAmount)}</div>
               <p className="text-xs text-muted-foreground">This year</p>
             </CardContent>
           </Card>
@@ -138,7 +161,7 @@ const ExpenseStats: React.FC = () => {
               <CardTitle className="text-sm font-medium">Monthly Average</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{formatCurrency(stats.monthlyTotal)}</div>
+              <div className="text-2xl font-bold">{formatCurrency(getCurrentMonthTotal())}</div>
               <p className="text-xs text-muted-foreground">Current month</p>
             </CardContent>
           </Card>
@@ -148,7 +171,7 @@ const ExpenseStats: React.FC = () => {
               <CardTitle className="text-sm font-medium">Average Expense</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{formatCurrency(stats.averageExpense || 0)}</div>
+              <div className="text-2xl font-bold">{formatCurrency(getAverageExpense())}</div>
               <p className="text-xs text-muted-foreground">Per transaction</p>
             </CardContent>
           </Card>
@@ -158,7 +181,7 @@ const ExpenseStats: React.FC = () => {
               <CardTitle className="text-sm font-medium">Categories</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.categoryBreakdown?.length || 0}</div>
+              <div className="text-2xl font-bold">{stats.byCategory?.length || 0}</div>
               <p className="text-xs text-muted-foreground">Active categories</p>
             </CardContent>
           </Card>
@@ -176,7 +199,7 @@ const ExpenseStats: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {stats.categoryBreakdown?.map((category, index) => (
+                {getCategoryBreakdown().map((category, index) => (
                   <div key={category.category} className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span className="font-medium">{category.category}</span>
@@ -189,7 +212,7 @@ const ExpenseStats: React.FC = () => {
                       />
                     </div>
                     <div className="flex justify-between text-xs text-muted-foreground">
-                      <span>{formatCurrency(category.amount)}</span>
+                      <span>{formatCurrency(category.total)}</span>
                       <span>{category.count} expenses</span>
                     </div>
                   </div>
@@ -206,7 +229,7 @@ const ExpenseStats: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {stats.categoryBreakdown?.map((category, index) => (
+                {getCategoryBreakdown().map((category, index) => (
                   <div key={category.category} className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className={`w-4 h-4 rounded-full ${COLORS[index % COLORS.length]}`} />
@@ -216,7 +239,7 @@ const ExpenseStats: React.FC = () => {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="font-medium">{formatCurrency(category.amount)}</p>
+                      <p className="font-medium">{formatCurrency(category.total)}</p>
                       <Badge variant="secondary">{category.percentage.toFixed(1)}%</Badge>
                     </div>
                   </div>
@@ -238,22 +261,22 @@ const ExpenseStats: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {stats.monthlyTrends?.map((trend) => (
-                  <div key={trend.month} className="space-y-2">
+                {stats.byMonth?.map((month) => (
+                  <div key={month.month} className="space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span className="font-medium">{trend.month}</span>
-                      <span>{formatCurrency(trend.amount)}</span>
+                      <span className="font-medium">{new Date(2024, month.month - 1).toLocaleDateString('en-US', { month: 'long' })}</span>
+                      <span>{formatCurrency(month.total)}</span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
                       <div
                         className="bg-blue-500 h-2 rounded-full"
                         style={{ 
-                          width: `${Math.min(100, (trend.amount / Math.max(...(stats.monthlyTrends || []).map(t => t.amount))) * 100)}%` 
+                          width: `${Math.min(100, (month.total / Math.max(...(stats.byMonth || []).map(m => m.total))) * 100)}%` 
                         }}
                       />
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      {trend.count} transactions
+                      {month.count} transactions
                     </div>
                   </div>
                 ))}
@@ -269,17 +292,17 @@ const ExpenseStats: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {stats.monthlyTrends?.map((trend) => (
-                  <div key={trend.month} className="space-y-2">
+                {stats.byMonth?.map((month) => (
+                  <div key={month.month} className="space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span className="font-medium">{trend.month}</span>
-                      <span>{trend.count} expenses</span>
+                      <span className="font-medium">{new Date(2024, month.month - 1).toLocaleDateString('en-US', { month: 'long' })}</span>
+                      <span>{month.count} expenses</span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
                       <div
                         className="bg-green-500 h-2 rounded-full"
                         style={{ 
-                          width: `${Math.min(100, (trend.count / Math.max(...(stats.monthlyTrends || []).map(t => t.count))) * 100)}%` 
+                          width: `${Math.min(100, (month.count / Math.max(...(stats.byMonth || []).map(m => m.count))) * 100)}%` 
                         }}
                       />
                     </div>
@@ -289,35 +312,7 @@ const ExpenseStats: React.FC = () => {
             </CardContent>
           </Card>
 
-          {/* Top Merchants */}
-          {stats.topMerchants && stats.topMerchants.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Top Merchants</CardTitle>
-                <CardDescription>Most frequent vendors</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {stats.topMerchants.slice(0, 10).map((merchant, index) => (
-                    <div key={merchant.merchant} className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-medium">
-                          {index + 1}
-                        </div>
-                        <div>
-                          <p className="font-medium">{merchant.merchant}</p>
-                          <p className="text-sm text-muted-foreground">{merchant.count} transactions</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-medium">{formatCurrency(merchant.amount)}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+
         </div>
       )}
     </div>
