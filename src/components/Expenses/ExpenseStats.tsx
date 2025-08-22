@@ -60,12 +60,13 @@ const ExpenseStats: React.FC = () => {
     }
   };
 
-  // Calculate derived values
+  // Calculate derived values (same logic as main Expenses component)
   const getCurrentMonthTotal = () => {
     if (!stats) return 0;
-    const currentMonth = new Date().getMonth() + 1;
-    const currentMonthData = stats.byMonth?.find(m => m.month === currentMonth);
-    return currentMonthData?.total || 0;
+    return (
+      stats.byMonth?.find(m => m.month === new Date().getMonth() + 1)?.total || 
+      stats.byMonth?.reduce((sum, month) => sum + month.total, 0) / 12 || 0
+    );
   };
 
   const getAverageExpense = () => {
@@ -162,7 +163,13 @@ const ExpenseStats: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{formatCurrency(getCurrentMonthTotal())}</div>
-              <p className="text-xs text-muted-foreground">Current month</p>
+              <p className="text-xs text-muted-foreground">
+                {(() => {
+                  const currentMonth = new Date().getMonth() + 1;
+                  const currentMonthData = stats.byMonth?.find(m => m.month === currentMonth);
+                  return currentMonthData?.total ? 'Current month' : 'Monthly average';
+                })()}
+              </p>
             </CardContent>
           </Card>
           

@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "react-day-picker/dist/style.css";
 
 @custom-variant dark (&:is(.dark *));
 :root {
@@ -173,4 +174,83 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;  /* Chrome, Safari and Opera */
   }
+}
+
+/* Custom Date Picker Styles */
+.rdp {
+  --rdp-cell-size: 2rem;
+  --rdp-accent-color: hsl(var(--primary));
+  --rdp-background-color: hsl(var(--accent));
+  --rdp-accent-color-dark: hsl(var(--primary));
+  --rdp-background-color-dark: hsl(var(--accent));
+  --rdp-outline: 2px solid hsl(var(--ring));
+  --rdp-outline-selected: 2px solid hsl(var(--primary));
+  margin: 0;
+}
+
+.rdp-day_selected,
+.rdp-day_selected:focus-visible,
+.rdp-day_selected:hover {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+.rdp-day_today {
+  background-color: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+  font-weight: 600;
+}
+
+.rdp-button:hover:not([disabled]):not(.rdp-day_selected) {
+  background-color: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+}
+
+.rdp-button:focus-visible:not([disabled]) {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+/* Enhanced Date Picker Navigation */
+.rdp-caption {
+  display: none !important;
+}
+
+.rdp-nav {
+  display: none !important;
+}
+
+/* Custom navigation styling */
+.date-picker-nav {
+  border-bottom: 1px solid hsl(var(--border));
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+}
+
+.date-picker-year-select {
+  min-width: 80px;
+}
+
+.date-picker-month {
+  font-weight: 500;
+  color: hsl(var(--foreground));
+}
+
+.date-picker-nav-buttons {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.date-picker-nav-button {
+  transition: all 0.2s ease;
+}
+
+.date-picker-nav-button:hover:not(:disabled) {
+  background-color: hsl(var(--accent));
+  transform: scale(1.05);
+}
+
+.date-picker-nav-button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
 }

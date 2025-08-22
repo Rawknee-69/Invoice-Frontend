@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { DatePicker } from '@/components/ui/date-picker';
 import { expenseApi } from '@/utils/api';
 import ExpenseStats from './ExpenseStats';
 import ReceiptScanner from './ReceiptScanner';
@@ -66,8 +67,8 @@ const Expenses: React.FC = () => {
   // Filters and search
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [dateFrom, setDateFrom] = useState('');
-  const [dateTo, setDateTo] = useState('');
+  const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined);
+  const [dateTo, setDateTo] = useState<Date | undefined>(undefined);
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
   
@@ -94,6 +95,9 @@ const Expenses: React.FC = () => {
   // Delete confirmation
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [expenseToDelete, setExpenseToDelete] = useState<string | null>(null);
+  const [loadingReceipts, setLoadingReceipts] = useState<Set<string>>(new Set());
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
 
   // Fetch expenses with filters
   const fetchExpenses = useCallback(async () => {
@@ -103,8 +107,8 @@ const Expenses: React.FC = () => {
       
       if (searchTerm) params.append('search', searchTerm);
       if (selectedCategory && selectedCategory !== 'all') params.append('category', selectedCategory);
-      if (dateFrom) params.append('dateFrom', dateFrom);
-      if (dateTo) params.append('dateTo', dateTo);
+      if (dateFrom) params.append('dateFrom', dateFrom.toISOString().split('T')[0]);
+      if (dateTo) params.append('dateTo', dateTo.toISOString().split('T')[0]);
       params.append('page', page.toString());
       params.append('limit', limit.toString());
       
@@ -150,10 +154,44 @@ const Expenses: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    fetchExpenses();
     fetchStats();
     fetchCategories();
-  }, [fetchExpenses, fetchStats, fetchCategories]);
+  }, [fetchStats, fetchCategories]);
+
+  // Keyboard shortcut to toggle filters
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && filtersOpen) {
+        setFiltersOpen(false);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [filtersOpen]);
+
+  // Debounced search for better performance
+  useEffect(() => {
+    setIsSearching(true);
+    const timeoutId = setTimeout(() => {
+      if (page === 1) {
+        fetchExpenses();
+      } else {
+        setPage(1); // Reset to first page when filters change
+      }
+      setIsSearching(false);
+    }, 300); // 300ms debounce
+
+    return () => {
+      clearTimeout(timeoutId);
+      setIsSearching(false);
+    };
+  }, [searchTerm, selectedCategory, dateFrom, dateTo]);
+
+  // Fetch when page changes (separate from filter changes)
+  useEffect(() => {
+    fetchExpenses();
+  }, [page]);
 
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
@@ -331,26 +369,131 @@ const Expenses: React.FC = () => {
         </div>
       </div>
 
-      {/* Error Message */}
-      {error && (
-        <Card className="border-destructive">
-          <CardContent className="pt-6">
-            <p className="text-destructive">{error}</p>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => setError(null)}
-              className="mt-2"
-            >
-              Dismiss
-            </Button>
-          </CardContent>
-        </Card>
-      )}
+             {/* Filters */}
+       <Card>
+         <CardHeader 
+           className="pb-3 cursor-pointer hover:bg-muted/50 transition-colors"
+           onClick={() => setFiltersOpen(!filtersOpen)}
+         >
+           <div className="flex items-center justify-between">
+             <CardTitle className="text-lg flex items-center gap-2">
+               <Filter className="h-5 w-5" />
+               Filters
+               {(searchTerm || selectedCategory !== 'all' || dateFrom || dateTo) && (
+                 <Badge variant="secondary" className="ml-2 text-xs">
+                   Active
+                 </Badge>
+               )}
+             </CardTitle>
+             <Button 
+               variant="ghost" 
+               size="sm"
+               className="h-6 w-6 p-0"
+             >
+               {filtersOpen ? '−' : '+'}
+             </Button>
+           </div>
+         </CardHeader>
+         {filtersOpen && (
+           <CardContent>
+             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                               <div className="space-y-2">
+                  <label className="text-sm font-medium text-muted-foreground">Search</label>
+                  <div className="relative">
+                    {isSearching ? (
+                      <div className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                      </div>
+                    ) : (
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    )}
+                    <Input
+                      placeholder="Search expenses..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
+               
+               <div className="space-y-2">
+                 <label className="text-sm font-medium text-muted-foreground">Category</label>
+                 <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                   <SelectTrigger>
+                     <SelectValue placeholder="All Categories" />
+                   </SelectTrigger>
+                   <SelectContent>
+                     <SelectItem value="all">All Categories</SelectItem>
+                     {categories.map((category) => (
+                       <SelectItem key={category} value={category}>
+                         {category}
+                       </SelectItem>
+                     ))}
+                   </SelectContent>
+                 </Select>
+               </div>
+               
+                               <div className="space-y-2">
+                  <label className="text-sm font-medium text-muted-foreground">From Date</label>
+                  <DatePicker
+                    value={dateFrom}
+                    onValueChange={setDateFrom}
+                    placeholder="Select start date"
+                    toDate={dateTo}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-muted-foreground">To Date</label>
+                  <DatePicker
+                    value={dateTo}
+                    onValueChange={setDateTo}
+                    placeholder="Select end date"
+                    fromDate={dateFrom}
+                  />
+                </div>
+               
+               <div className="space-y-2">
+                 <label className="text-sm font-medium text-muted-foreground">&nbsp;</label>
+                                   <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => {
+                      setSearchTerm('');
+                      setSelectedCategory('all');
+                      setDateFrom(undefined);
+                      setDateTo(undefined);
+                      setPage(1);
+                    }}
+                  >
+                    Clear Filters
+                  </Button>
+               </div>
+             </div>
+           </CardContent>
+         )}
+       </Card>
 
-      {/* Statistics Cards */}
-      {stats && (
-        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+       {/* Error Message */}
+       {error && (
+         <Card className="border-destructive">
+           <CardContent className="pt-6">
+             <p className="text-destructive">{error}</p>
+             <Button 
+               variant="outline" 
+               size="sm" 
+               onClick={() => setError(null)}
+               className="mt-2"
+             >
+               Dismiss
+             </Button>
+           </CardContent>
+         </Card>
+       )}
+
+       {/* Statistics Cards */}
+       {stats && (
+         <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-xs sm:text-sm font-medium">
@@ -406,70 +549,7 @@ const Expenses: React.FC = () => {
         </div>
       )}
 
-      {/* Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Filter className="h-5 w-5" />
-            Filters
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search expenses..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            
-            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-              <SelectTrigger>
-                <SelectValue placeholder="Category" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
-                {categories.map((category) => (
-                  <SelectItem key={category} value={category}>
-                    {category}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            
-            <Input
-              type="date"
-              placeholder="From Date"
-              value={dateFrom}
-              onChange={(e) => setDateFrom(e.target.value)}
-            />
-            
-            <Input
-              type="date"
-              placeholder="To Date"
-              value={dateTo}
-              onChange={(e) => setDateTo(e.target.value)}
-            />
-            
-            <Button 
-              variant="outline" 
-              className="sm:col-span-1 lg:col-span-1"
-              onClick={() => {
-                setSearchTerm('');
-                setSelectedCategory('all');
-                setDateFrom('');
-                setDateTo('');
-                setPage(1);
-              }}
-            >
-              Clear Filters
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      
 
       {/* Expenses Table */}
       <Card>
@@ -534,20 +614,49 @@ const Expenses: React.FC = () => {
                       <Button 
                         variant="ghost" 
                         size="sm"
-                        onClick={() => {
-                          if (expense.receiptImageUrl || expense.receiptImage) {
-                            window.open(expense.receiptImageUrl || expense.receiptImage, '_blank');
+                        onClick={async () => {
+                          const imageUrl = expense.receiptImageUrl || expense.receiptImage;
+                          if (imageUrl) {
+                            setLoadingReceipts(prev => new Set(prev).add(expense.id));
+                            try {
+                              const response = await expenseApi.getReceiptUrl(imageUrl);
+                              if (response.data && typeof response.data === 'object' && 'presignedUrl' in response.data) {
+                                window.open(response.data.presignedUrl as string, '_blank');
+                              } else {
+                                // Fallback to original URL if signed URL generation fails
+                                window.open(imageUrl, '_blank');
+                              }
+                            } catch (error) {
+                              console.error('Error getting secure receipt URL:', error);
+                              // Fallback to original URL
+                              window.open(imageUrl, '_blank');
+                            } finally {
+                              setLoadingReceipts(prev => {
+                                const newSet = new Set(prev);
+                                newSet.delete(expense.id);
+                                return newSet;
+                              });
+                            }
                           }
                         }}
-                        disabled={!(expense.receiptImageUrl || expense.receiptImage)}
+                        disabled={!(expense.receiptImageUrl || expense.receiptImage) || loadingReceipts.has(expense.id)}
                         className={`${
                           (expense.receiptImageUrl || expense.receiptImage) 
                             ? 'text-blue-600 hover:text-blue-800 cursor-pointer' 
                             : 'text-gray-400 cursor-not-allowed'
                         }`}
                       >
-                        <Eye className="h-4 w-4 mr-1" />
-                        View
+                        {loadingReceipts.has(expense.id) ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 mr-1 border-b-2 border-current"></div>
+                            Loading...
+                          </>
+                        ) : (
+                          <>
+                            <Eye className="h-4 w-4 mr-1" />
+                            View
+                          </>
+                        )}
                       </Button>
                     </TableCell>
                     <TableCell>
@@ -564,15 +673,44 @@ const Expenses: React.FC = () => {
                           </DropdownMenuItem>
                           <DropdownMenuItem 
                             className="lg:hidden"
-                            disabled={!(expense.receiptImageUrl || expense.receiptImage)}
-                            onClick={() => {
-                              if (expense.receiptImageUrl || expense.receiptImage) {
-                                window.open(expense.receiptImageUrl || expense.receiptImage, '_blank');
+                            disabled={!(expense.receiptImageUrl || expense.receiptImage) || loadingReceipts.has(expense.id)}
+                            onClick={async () => {
+                              const imageUrl = expense.receiptImageUrl || expense.receiptImage;
+                              if (imageUrl) {
+                                setLoadingReceipts(prev => new Set(prev).add(expense.id));
+                                try {
+                                  const response = await expenseApi.getReceiptUrl(imageUrl);
+                                  if (response.data && typeof response.data === 'object' && 'presignedUrl' in response.data) {
+                                    window.open(response.data.presignedUrl as string, '_blank');
+                                  } else {
+                                    // Fallback to original URL if signed URL generation fails
+                                    window.open(imageUrl, '_blank');
+                                  }
+                                } catch (error) {
+                                  console.error('Error getting secure receipt URL:', error);
+                                  // Fallback to original URL
+                                  window.open(imageUrl, '_blank');
+                                } finally {
+                                  setLoadingReceipts(prev => {
+                                    const newSet = new Set(prev);
+                                    newSet.delete(expense.id);
+                                    return newSet;
+                                  });
+                                }
                               }
                             }}
                           >
-                            <Eye className="h-4 w-4 mr-2" />
-                            {(expense.receiptImageUrl || expense.receiptImage) ? 'View Receipt' : 'No Receipt'}
+                            {loadingReceipts.has(expense.id) ? (
+                              <>
+                                <div className="animate-spin rounded-full h-4 w-4 mr-2 border-b-2 border-current"></div>
+                                Loading...
+                              </>
+                            ) : (
+                              <>
+                                <Eye className="h-4 w-4 mr-2" />
+                                {(expense.receiptImageUrl || expense.receiptImage) ? 'View Receipt' : 'No Receipt'}
+                              </>
+                            )}
                           </DropdownMenuItem>
                           <DropdownMenuItem 
                             variant="destructive"

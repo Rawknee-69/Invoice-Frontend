@@ -207,6 +207,11 @@ export const expenseApi = {
       method: "POST",
       body: JSON.stringify({ originalScanResult, corrections }),
     }),
+  getReceiptUrl: (imageUrl: string) =>
+    apiRequest("/api/expenses/receipt-url", {
+      method: "POST",
+      body: JSON.stringify({ imageUrl }),
+    }),
 };
 
 // Payment API calls
