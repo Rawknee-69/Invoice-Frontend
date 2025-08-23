@@ -17,7 +17,7 @@ import {
 
 import { ModeToggle } from "@/components/Themes/modetoggle";
 import { useAuth } from "../../../hooks/useAuth";
-import { getImageUrl } from "../../../utils/image";
+import { getImageUrl } from "../../../../Docs/utils/image";
 
 interface NavbarProps {
   searchPlaceholder?: string;
