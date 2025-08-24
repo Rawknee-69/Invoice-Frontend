@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Navigate } from "react-router";
 import Invoice from "/src/assets/invoice.png";
-import { toastMessages } from "../../Docs/utils/toast";
+import { toastMessages } from "../utils/toast";
 import { ForgotPasswordModal } from "../components/auth/ForgotPasswordModal";
 
 const Login: React.FC = () => {

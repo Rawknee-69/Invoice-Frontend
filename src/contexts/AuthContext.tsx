@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { signIn, signOut, signUp, useSession } from "../lib/auth-client";
 import { AuthContext } from "./auth-context";
-import { toastMessages } from "../../Docs/utils/toast";
+import { toastMessages } from "../utils/toast";
 
 interface User {
   id: string;
