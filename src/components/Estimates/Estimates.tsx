@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import EstimateFilterTabs, { type EstimateStatus } from "./EstimateFilterTabs";
 import { estimateApi } from "@/utils/api";
+import { EstimateSkeleton } from "@/skletons";
 
 interface EstimateItem {
   id: string;
@@ -153,19 +154,7 @@ const Estimates = () => {
   }, {} as Record<string, EstimateItem[]>);
 
   if (loading) {
-    return (
-      <div className="p-6">
-        <div className="mb-6">
-          <EstimateFilterTabs
-            activeFilter={activeFilter}
-            onFilterChange={handleFilterChange}
-          />
-        </div>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-muted-foreground">Loading estimates...</div>
-        </div>
-      </div>
-    );
+    return <EstimateSkeleton count={7} />;
   }
 
   if (error) {

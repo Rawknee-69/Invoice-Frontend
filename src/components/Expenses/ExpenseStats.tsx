@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { expenseApi } from '@/utils/api';
+import { GenericSkeleton } from '@/skletons';
 
 interface CategoryStats {
   category: string;
@@ -94,8 +95,9 @@ const ExpenseStats: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className="space-y-6">
+        <GenericSkeleton type="card" count={4} showHeader />
+        <GenericSkeleton type="table" count={6} showHeader />
       </div>
     );
   }

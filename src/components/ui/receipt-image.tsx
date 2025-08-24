@@ -55,8 +55,8 @@ export const ReceiptImage: React.FC<ReceiptImageProps> = ({
 
   if (isLoading) {
     return (
-      <div className={`bg-gray-200 animate-pulse flex items-center justify-center ${className}`}>
-        <span className="text-gray-500 text-sm">Loading...</span>
+      <div className={`bg-muted animate-pulse flex items-center justify-center ${className}`}>
+        <div className="h-4 w-16 bg-muted animate-pulse rounded" />
       </div>
     );
   }

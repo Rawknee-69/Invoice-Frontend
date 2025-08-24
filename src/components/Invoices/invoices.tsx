@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import InvoiceFilterTabs, { type InvoiceStatus } from "./InvoiceFilterTabs";
 import { invoiceApi } from "@/utils/api";
+import { InvoiceSkeleton } from "@/skletons";
 
 interface InvoiceItem {
   id: string;
@@ -160,19 +161,7 @@ const Invoices = () => {
   }, {} as Record<string, InvoiceItem[]>);
 
   if (loading) {
-    return (
-      <div className="p-6">
-        <div className="mb-6">
-          <InvoiceFilterTabs
-            activeFilter={activeFilter}
-            onFilterChange={handleFilterChange}
-          />
-        </div>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-muted-foreground">Loading invoices...</div>
-        </div>
-      </div>
-    );
+    return <InvoiceSkeleton count={8} />;
   }
 
   if (error) {

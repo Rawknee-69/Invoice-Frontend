@@ -1,6 +1,7 @@
 import React from "react";
 import { Navigate, useLocation } from "react-router";
 import { useAuth } from "../hooks/useAuth";
+import { GenericSkeleton } from "@/skletons";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -10,13 +11,12 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
   const location = useLocation();
 
-  // Show loading spinner while checking authentication
+  // Show loading skeleton while checking authentication
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Checking authentication...</p>
+      <div className="min-h-screen bg-background">
+        <div className="container mx-auto p-4 sm:p-6">
+          <GenericSkeleton type="card" count={4} showHeader />
         </div>
       </div>
     );

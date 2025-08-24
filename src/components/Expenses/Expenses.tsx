@@ -14,6 +14,7 @@ import { expenseApi } from '@/utils/api';
 import ExpenseStats from './ExpenseStats';
 import ReceiptScanner from './ReceiptScanner';
 import { ReceiptImage } from '@/components/ui/receipt-image';
+import { ExpenseSkeleton } from '@/skletons';
 
 interface Expense {
   id: string;
@@ -561,9 +562,7 @@ const Expenses: React.FC = () => {
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="flex justify-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-            </div>
+            <ExpenseSkeleton count={6} />
           ) : expenses.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-muted-foreground">No expenses found</p>

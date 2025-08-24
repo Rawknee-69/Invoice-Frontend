@@ -6,6 +6,7 @@ import { Navigate } from "react-router";
 import Invoice from "/src/assets/invoice.png";
 import { toastMessages } from "../utils/toast";
 import { ForgotPasswordModal } from "../components/auth/ForgotPasswordModal";
+import { GenericSkeleton } from "@/skletons";
 
 const Login: React.FC = () => {
   const {
@@ -94,8 +95,23 @@ const Login: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+      <div className="min-h-screen bg-background">
+        <div className="flex items-center justify-center h-screen">
+          <div className="max-w-md w-full bg-card border border-border rounded-2xl shadow-lg p-8">
+            <div className="space-y-6">
+              <div className="text-center">
+                <div className="h-15 w-15 bg-muted animate-pulse rounded-full mx-auto mb-4" />
+                <div className="h-8 w-48 bg-muted animate-pulse rounded mx-auto mb-2" />
+                <div className="h-4 w-64 bg-muted animate-pulse rounded mx-auto" />
+              </div>
+              <div className="space-y-4">
+                <div className="h-10 w-full bg-muted animate-pulse rounded" />
+                <div className="h-10 w-full bg-muted animate-pulse rounded" />
+                <div className="h-10 w-full bg-muted animate-pulse rounded" />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
