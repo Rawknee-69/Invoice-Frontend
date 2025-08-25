@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import InvoiceFilterTabs, { type InvoiceStatus } from "./InvoiceFilterTabs";
 import { invoiceApi } from "@/utils/api";
 import { InvoiceSkeleton } from "@/skletons";
+import CreateInvoiceModal from "./CreateInvoiceModal";
 
 interface InvoiceItem {
   id: string;
@@ -384,6 +385,9 @@ const Invoices = () => {
           </div>
         </>
       )}
+
+      {/* Create Invoice Modal */}
+      <CreateInvoiceModal />
     </div>
   );
 };
