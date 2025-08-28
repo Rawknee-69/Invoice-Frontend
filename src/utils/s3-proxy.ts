@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:3000";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 // Cache for pre-signed URLs to prevent duplicate requests
 const urlCache = new Map<string, { url: string; expires: number }>();

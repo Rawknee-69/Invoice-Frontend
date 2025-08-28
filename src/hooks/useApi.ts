@@ -13,8 +13,10 @@ export const useApi = () => {
   const apiCall = useCallback(async (url: string, options: ApiOptions = {}) => {
     try {
       const token = await getToken();
+
+      const urlsa= "http://ugck080wkk4wcs0scw8gkk8c.168.231.79.45.sslip.io "
       
-      const response = await fetch(`http://localhost:3000${url}`, {
+      const response = await fetch(`${urlsa}/${url}`, {
         method: options.method || 'GET',
         headers: {
           'Content-Type': 'application/json',

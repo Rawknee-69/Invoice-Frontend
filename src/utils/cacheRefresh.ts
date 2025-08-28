@@ -102,3 +102,4 @@ class CacheRefreshManager {
 }
 
 export const cacheRefreshManager = CacheRefreshManager.getInstance();
+

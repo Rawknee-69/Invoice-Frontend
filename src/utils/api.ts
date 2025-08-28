@@ -5,7 +5,8 @@ import { cacheManager, authCache, statsCache, settingsCache, cacheKeys } from '.
 import { requestDeduplicator, generateRequestKey } from './request-deduplication';
 import { performanceMonitor } from './performance-monitor';
 
-const API_URL = "http://localhost:3000";
+// const API_URL = "http://localhost:3000";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 interface ApiResponse<T = any> {
   data?: T;
@@ -202,7 +203,7 @@ export const authApi = {
     return apiRequest("/api/auth/sign-out", { method: "POST" });
   },
   signInWithGoogle: () =>
-    `http://localhost:3000/api/auth/sign-in/social?provider=google`,
+    `${API_URL}/api/auth/sign-in/social?provider=google`,
 };
 
 // Profile API calls
