@@ -5,6 +5,7 @@ import {
   useLocation,
 } from "react-router";
 import { useEffect } from "react";
+import { ClerkProvider } from '@clerk/clerk-react';
 import {
   Home,
   Page404,
@@ -36,10 +37,15 @@ function App() {
     }
   }, [measurementId]);
 
+  // Clerk configuration is now handled in OptimizedClerkProvider
+
+  const publishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || "pk_test_c3F1YXJlLXB1bWEtNTMuY2xlcmsuYWNjb3VudHMuZGV2JA";
+
   return (
-    <Router>
-      <AuthProvider>
-        <ThemeProvider>
+    <ClerkProvider publishableKey={publishableKey}>
+      <Router>
+        <AuthProvider>
+          <ThemeProvider>
           <TrackPageViews />
           <div style={{ minHeight: "35rem" }}>
             <Routes>
@@ -120,8 +126,9 @@ function App() {
           />
         </ThemeProvider>
       </AuthProvider>
-    </Router>
-  );
+            </Router>
+      </ClerkProvider>
+    );
 }
 
 function TrackPageViews() {

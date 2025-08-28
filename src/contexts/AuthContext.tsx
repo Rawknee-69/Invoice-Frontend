@@ -1,6 +1,5 @@
-import React, { useState } from "react";
-import { signIn, signOut, signUp, useSession } from "../lib/auth-client";
-import { AuthContext } from "./auth-context";
+import React, { createContext, useContext, useState, useEffect, useMemo } from "react";
+import { useAuth as useClerkAuth, useUser } from '@clerk/clerk-react';
 import { toastMessages } from "../utils/toast";
 
 interface User {
@@ -11,103 +10,59 @@ interface User {
   emailVerified?: boolean;
 }
 
+interface AuthContextType {
+  user: User | null;
+  isLoggingIn: boolean;
+  isLoading: boolean;
+  login: () => Promise<void>;
+  logout: () => Promise<void>;
+  refreshUser: () => Promise<void>;
+  isAuthenticated: boolean;
+  token?: string;
+  checkAuth: () => Promise<void>;
+}
+
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
 interface AuthProviderProps {
   children: React.ReactNode;
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const { data: session, isPending } = useSession();
+  const { isLoaded, isSignedIn, signOut: clerkSignOut } = useClerkAuth();
+  const { user: clerkUser } = useUser();
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
 
-  const user: User | null = session?.user
-    ? {
-        id: session.user.id,
-        email: session.user.email,
-        name: session.user.name,
-        image: session.user.image || undefined,
-        emailVerified: session.user.emailVerified || false,
-      }
-    : null;
+  // Memoize user data to prevent unnecessary re-renders
+  const userData = useMemo(() => {
+    if (isLoaded && isSignedIn && clerkUser) {
+      return {
+        id: clerkUser.id,
+        email: clerkUser.emailAddresses[0]?.emailAddress || '',
+        name: `${clerkUser.firstName || ''} ${clerkUser.lastName || ''}`.trim(),
+        image: clerkUser.imageUrl,
+        emailVerified: clerkUser.emailAddresses[0]?.verification?.status === 'verified',
+      };
+    }
+    return null;
+  }, [isLoaded, isSignedIn, clerkUser?.id, clerkUser?.firstName, clerkUser?.lastName, clerkUser?.imageUrl, clerkUser?.emailAddresses]);
+
+  // Convert Clerk user to our User interface with memoization
+  useEffect(() => {
+    setUser(userData);
+  }, [userData]);
 
   const login = async () => {
     try {
       setIsLoggingIn(true);
-      await signIn.social({
-        provider: "google",
-        // The backend will handle the redirect to frontend/home after successful auth
-      });
-      toastMessages.auth.loginSuccess("Google");
+      // Clerk handles the login flow automatically
+      // This function is kept for compatibility
+      toastMessages.auth.loginSuccess();
     } catch (error) {
       console.error("Login failed:", error);
       toastMessages.auth.loginError("Google");
-      throw error; // Re-throw so the UI can handle it
-    } finally {
-      setIsLoggingIn(false);
-    }
-  };
-
-  const loginWithApple = async () => {
-    try {
-      setIsLoggingIn(true);
-      await signIn.social({
-        provider: "apple",
-        // The backend will handle the redirect to frontend/home after successful auth
-      });
-      toastMessages.auth.loginSuccess("Apple");
-    } catch (error) {
-      console.error("Apple login failed:", error);
-      toastMessages.auth.loginError("Apple");
-      throw error; // Re-throw so the UI can handle it
-    } finally {
-      setIsLoggingIn(false);
-    }
-  };
-
-  const loginWithEmail = async (email: string, password: string) => {
-    try {
-      setIsLoggingIn(true);
-      await signIn.email({
-        email,
-        password,
-      });
-      toastMessages.auth.loginSuccess();
-    } catch (error) {
-      console.error("Email login failed:", error);
-      toastMessages.auth.invalidCredentials();
-      throw error; // Re-throw so the UI can handle it
-    } finally {
-      setIsLoggingIn(false);
-    }
-  };
-
-  const signUpWithEmail = async (
-    email: string,
-    password: string,
-    name: string
-  ) => {
-    try {
-      setIsLoggingIn(true);
-      await signUp.email({
-        email,
-        password,
-        name,
-      });
-      toastMessages.auth.signupSuccess();
-      toastMessages.general.info(
-        "Please check your email to verify your account before signing in."
-      );
-    } catch (error) {
-      console.error("Email signup failed:", error);
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to create account";
-      if (errorMessage.includes("email")) {
-        toastMessages.auth.emailExists();
-      } else if (errorMessage.includes("password")) {
-        toastMessages.auth.passwordTooShort();
-      } else {
-        toastMessages.auth.signupError();
-      }
-      throw error; // Re-throw so the UI can handle it
+      throw error;
     } finally {
       setIsLoggingIn(false);
     }
@@ -115,45 +70,43 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const logout = async () => {
     try {
-      await signOut();
+      await clerkSignOut();
+      setUser(null);
       toastMessages.auth.logoutSuccess();
-      // Redirect to landing page after logout
-      window.location.href = "/";
     } catch (error) {
       console.error("Logout failed:", error);
       toastMessages.auth.logoutError();
-
-      // Fallback: Clear local session and redirect
-      // This ensures user is logged out even if the server call fails
-      try {
-        // Clear any local storage or session storage if needed
-        localStorage.clear();
-        sessionStorage.clear();
-      } catch (storageError) {
-        console.warn("Could not clear storage:", storageError);
-      }
-
-      // Always redirect to landing page
-      window.location.href = "/";
     }
   };
 
-  const checkAuth = async () => {
-    // This is handled by the useSession hook automatically
-    return;
+  const refreshUser = async () => {
+    // Clerk handles user refresh automatically
+    // This function is kept for compatibility
   };
 
-  const value = {
+  const checkAuth = async () => {
+    // Clerk handles auth checking automatically
+    // This function is kept for compatibility
+  };
+
+  const value: AuthContextType = {
     user,
-    isLoading: isPending || isLoggingIn,
-    isAuthenticated: !!user,
+    isLoading: !isLoaded,
+    isLoggingIn,
+    isAuthenticated: isSignedIn || false,
     login,
-    loginWithApple,
-    loginWithEmail,
-    signUpWithEmail,
     logout,
+    refreshUser,
     checkAuth,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+};
+
+export const useAuthContext = () => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error("useAuthContext must be used within an AuthProvider");
+  }
+  return context;
 };

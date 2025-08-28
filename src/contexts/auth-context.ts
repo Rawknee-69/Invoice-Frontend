@@ -11,16 +11,17 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  login: () => void;
-  loginWithApple: () => void;
+  login: () => Promise<void>;
+  loginWithApple: () => Promise<void>;
   loginWithEmail: (email: string, password: string) => Promise<void>;
   signUpWithEmail: (
     email: string,
     password: string,
     name: string
   ) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
+  token?: string;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(

@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { Link, useLocation } from "react-router";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,7 +18,7 @@ import {
 
 import { ModeToggle } from "@/components/Themes/modetoggle";
 import { useAuth } from "../../../hooks/useAuth";
-import { getImageUrl } from "../../../utils/image";
+import CachedProfileImage from "../../ui/CachedProfileImage";
 
 interface NavbarProps {
   searchPlaceholder?: string;
@@ -26,7 +27,7 @@ interface NavbarProps {
   onNewClick?: () => void;
 }
 
-export function Navbar({
+export const Navbar = React.memo(function Navbar({
   searchPlaceholder = "Search...",
   // showNewButton = true,
   // newButtonText = "New Item",
@@ -97,32 +98,11 @@ export function Navbar({
           {user && (
             <div className="flex items-center space-x-3">
               <div className="flex items-center space-x-2">
-                {getImageUrl(user.image) ? (
-                  <img
-                    src={getImageUrl(user.image)!}
-                    alt={user.name}
-                    className="w-8 h-8 rounded-full"
-                    referrerPolicy="no-referrer-when-downgrade"
-                    crossOrigin="anonymous"
-                    onError={(e) => {
-                      console.error(
-                        "Failed to load profile image:",
-                        user.image
-                      );
-                      e.currentTarget.style.display = "none";
-                      e.currentTarget.nextElementSibling?.removeAttribute(
-                        "style"
-                      );
-                    }}
-                    onLoad={() =>
-                      console.log("Profile image loaded successfully")
-                    }
-                  />
-                ) : (
-                  <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-                    <User className="w-4 h-4 text-gray-600" />
-                  </div>
-                )}
+                <CachedProfileImage
+                  imageUrl={user.image}
+                  name={user.name}
+                  size="md"
+                />
                 <span className="text-sm font-medium text-foreground">
                   {user.name}
                 </span>
@@ -146,29 +126,12 @@ export function Navbar({
         <div className="bg-primary text-primary-foreground px-4 py-4 flex items-center justify-between">
           {user && (
             <div className="flex items-center space-x-2">
-              {getImageUrl(user.image) ? (
-                <img
-                  src={getImageUrl(user.image)!}
-                  alt={user.name}
-                  className="w-6 h-6 rounded-full"
-                  referrerPolicy="no-referrer-when-downgrade"
-                  crossOrigin="anonymous"
-                  onError={(e) => {
-                    console.error(
-                      "Failed to load mobile profile image:",
-                      user.image
-                    );
-                    e.currentTarget.style.display = "none";
-                  }}
-                  onLoad={() =>
-                    console.log("Mobile profile image loaded successfully")
-                  }
-                />
-              ) : (
-                <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
-                  <User className="w-3 h-3" />
-                </div>
-              )}
+              <CachedProfileImage
+                imageUrl={user.image}
+                name={user.name}
+                size="sm"
+                className="w-6 h-6"
+              />
               <span className="text-sm font-medium truncate max-w-20">
                 {user.name.split(" ")[0]}
               </span>
@@ -198,4 +161,4 @@ export function Navbar({
       </div>
     </>
   );
-}
+});
