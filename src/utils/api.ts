@@ -8,6 +8,19 @@ import { performanceMonitor } from './performance-monitor';
 // const API_URL = "http://localhost:3000";
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
+// Helper function to get Clerk token
+const getClerkToken = async (): Promise<string | null> => {
+  try {
+    // For now, we'll rely on Clerk's session cookies
+    // The backend should be able to read the session from cookies
+    // This will work for browser-based requests
+    return null;
+  } catch (error) {
+    console.warn('Failed to get Clerk token:', error);
+    return null;
+  }
+};
+
 interface ApiResponse<T = any> {
   data?: T;
   error?: {
@@ -71,17 +84,45 @@ export const apiRequest = async <T>(
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
 
+      // Get authentication token
+      const token = await getClerkToken();
+      
+      // Prepare headers
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+        ...(fetchOptions.headers as Record<string, string>),
+      };
+
+      // Add authorization header if token exists
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
+      // Debug logging
+      console.log('API Request Debug:', {
+        url: `${API_URL}${endpoint}`,
+        method,
+        hasToken: !!token,
+        headers: Object.keys(headers),
+        credentials: "include"
+      });
+
       const response = await fetch(`${API_URL}${endpoint}`, {
         credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          ...fetchOptions.headers,
-        },
+        headers,
         signal: controller.signal,
         ...fetchOptions,
       });
 
       clearTimeout(timeoutId);
+
+      // Debug response
+      console.log('API Response Debug:', {
+        status: response.status,
+        statusText: response.statusText,
+        headers: Object.fromEntries(response.headers.entries()),
+        url: response.url
+      });
 
       const data = await response.json();
       const endTime = performance.now();
@@ -96,6 +137,15 @@ export const apiRequest = async <T>(
           cacheHit,
           "API_ERROR"
         );
+
+        // Enhanced error logging
+        console.error('API Error Details:', {
+          endpoint,
+          status: response.status,
+          statusText: response.statusText,
+          data,
+          headers: Object.fromEntries(response.headers.entries())
+        });
 
         return {
           error: {

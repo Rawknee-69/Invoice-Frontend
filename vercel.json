@@ -1,6 +1,6 @@
 {
   "env": {
-    "VITE_API_URL": "https://invoice-backend-theta-sepia.vercel.app"
+    "VITE_API_URL": "http://ugck080wkk4wcs0scw8gkk8c.168.231.79.45.sslip.io"
   },
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
