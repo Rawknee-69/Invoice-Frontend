@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { apiRequest, invalidateCache, cacheUtils } from '../../Docs/utils/api';
+import { apiRequest, invalidateCache, cacheUtils } from '../utils/api';
 
 interface UseApiOptions {
   useCache?: boolean;
@@ -65,11 +65,11 @@ export function useApi<T>(
         signal: abortControllerRef.current.signal,
       });
 
-      if (response.error) {
+      if (response.error && response.error.message) {
         setState(prev => ({
           ...prev,
           loading: false,
-          error: response.error.message,
+          error: response.error!.message,
         }));
       } else {
         setState({
@@ -161,13 +161,13 @@ export function useApiMutation<T, R = any>(
         body: data ? JSON.stringify(data) : undefined,
       });
 
-      if (response.error) {
+      if (response.error && response.error.message) {
         setState(prev => ({
           ...prev,
           loading: false,
-          error: response.error.message,
+          error: response.error!.message,
         }));
-        return { error: response.error };
+        return { error: response.error! };
       } else {
         setState({
           loading: false,

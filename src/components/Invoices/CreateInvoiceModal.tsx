@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Plus, X, Trash2, Plus as PlusIcon } from "lucide-react";
+import { Plus, Trash2, Plus as PlusIcon } from "lucide-react";
 import {
   Dialog,
   DialogContent,

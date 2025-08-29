@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { Upload, Camera, Check, X, Edit, AlertCircle } from 'lucide-react';
+import { Upload, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -42,9 +42,7 @@ const ReceiptScanner: React.FC<ReceiptScannerProps> = ({
   categories
 }) => {
   const [step, setStep] = useState<'upload' | 'scan' | 'review' | 'correct'>('upload');
-  const [file, setFile] = useState<File | null>(null);
   const [imageUrl, setImageUrl] = useState<string>('');
-  const [isScanning, setIsScanning] = useState(false);
   const [scanResult, setScanResult] = useState<ScanResult | null>(null);
   const [validation, setValidation] = useState<ValidationResult | null>(null);
   const [error, setError] = useState<string>('');
@@ -61,9 +59,7 @@ const ReceiptScanner: React.FC<ReceiptScannerProps> = ({
 
   const resetState = () => {
     setStep('upload');
-    setFile(null);
     setImageUrl('');
-    setIsScanning(false);
     setScanResult(null);
     setValidation(null);
     setError('');
@@ -98,7 +94,6 @@ const ReceiptScanner: React.FC<ReceiptScannerProps> = ({
       return;
     }
 
-    setFile(selectedFile);
     setError('');
     setStep('scan');
     handleScan(selectedFile);
@@ -118,7 +113,6 @@ const ReceiptScanner: React.FC<ReceiptScannerProps> = ({
 
   const handleScan = async (fileToScan: File) => {
     try {
-      setIsScanning(true);
       setError('');
 
       // Upload file
@@ -128,7 +122,7 @@ const ReceiptScanner: React.FC<ReceiptScannerProps> = ({
         return;
       }
 
-      const uploadedImageUrl = uploadResponse.data.imageUrl;
+      const uploadedImageUrl = (uploadResponse.data as any).imageUrl;
       setImageUrl(uploadedImageUrl);
 
       // Scan and populate
@@ -138,11 +132,11 @@ const ReceiptScanner: React.FC<ReceiptScannerProps> = ({
         return;
       }
 
-      setScanResult(scanResponse.data.scanResult);
-      setValidation(scanResponse.data.validation);
+      setScanResult((scanResponse.data as any).scanResult);
+      setValidation((scanResponse.data as any).validation);
 
       // Populate correction form with scan results
-      const fields = scanResponse.data.populatedFields || {};
+      const fields = (scanResponse.data as any).populatedFields || {};
       setCorrectedData({
         merchantName: fields.merchantName || '',
         amount: fields.amount?.toString() || '',
@@ -155,36 +149,10 @@ const ReceiptScanner: React.FC<ReceiptScannerProps> = ({
       setStep('review');
     } catch (err) {
       setError('Failed to scan receipt. Please try again.');
-    } finally {
-      setIsScanning(false);
     }
   };
 
-  const handleCorrection = async () => {
-    try {
-      if (!scanResult) return;
 
-      const corrections = {
-        merchantName: correctedData.merchantName,
-        amount: parseFloat(correctedData.amount),
-        date: correctedData.date,
-        description: correctedData.description,
-        category: correctedData.category
-      };
-
-      const response = await expenseApi.correctScan(scanResult, corrections);
-      if (response.error) {
-        setError(response.error.message);
-        return;
-      }
-
-      setScanResult(response.data.correctedResult);
-      setValidation(response.data.validation);
-      setStep('review');
-    } catch (err) {
-      setError('Failed to apply corrections.');
-    }
-  };
 
   const handleCreateExpense = async () => {
     try {

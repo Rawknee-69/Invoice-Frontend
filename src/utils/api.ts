@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // Optimized API utility functions with caching and request deduplication
 
-import { cacheManager, authCache, statsCache, settingsCache, cacheKeys } from './cache';
+import { cacheManager, authCache, cacheKeys } from './cache';
 import { requestDeduplicator, generateRequestKey } from './request-deduplication';
 import { performanceMonitor } from './performance-monitor';
 

@@ -13,7 +13,6 @@ import {
   Receipt,
   BarChart3,
   LogOut,
-  User,
 } from "lucide-react";
 
 import { ModeToggle } from "@/components/Themes/modetoggle";

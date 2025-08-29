@@ -97,7 +97,7 @@ class PerformanceMonitor {
     }
 
     const totalRequests = recentMetrics.length;
-    const successfulRequests = recentMetrics.filter(m => m.success);
+    // const successfulRequests = recentMetrics.filter(m => m.success);
     const failedRequests = recentMetrics.filter(m => !m.success);
     const cacheHits = recentMetrics.filter(m => m.cacheHit);
     const cacheMisses = recentMetrics.filter(m => !m.cacheHit);
@@ -253,7 +253,7 @@ export function trackPerformance<T extends (...args: any[]) => any>(
 ): T {
   return ((...args: any[]) => {
     const startTime = performance.now();
-    const startTimestamp = Date.now();
+    // const startTimestamp = Date.now();
 
     return target(...args)
       .then((result: any) => {
